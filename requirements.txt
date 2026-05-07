@@ -1,0 +1,6 @@
+fastapi==0.135.2
+uvicorn==0.41.0
+twelvelabs==1.2.2
+groq==1.1.2
+python-dotenv==1.1.1
+python-multipart==0.0.22
