@@ -21,6 +21,12 @@ export default defineConfig({
   build: {
     outDir: path.resolve(__dirname, '../backend/static'),
     emptyOutDir: true,
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, 'index.html'),
+        demo: path.resolve(__dirname, 'demo.html'),
+      },
+    },
   },
 
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.

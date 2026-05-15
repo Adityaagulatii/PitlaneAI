@@ -1,0 +1,359 @@
+{
+  "laps:69fc334eb913e9d5de5b2f1e:f1_sim": {
+    "result": "| Lap | Start | Key Issue |\n|-----|-------|-----------| ",
+    "laps": []
+  },
+  "coaching:69fac429edd7178efd86d8fe:kart:Full Analysis": {
+    "result": "## PERFORMANCE SUMMARY\nThe driver demonstrated a strong overall performance, with a consistent racing line and excellent throttle control. However, there is room for improvement in braking points and corner entry, which can lead to significant time gains. With a few key adjustments, the driver can optimize their lap times and increase their competitiveness.\n\n## RACING LINE  (score: 8/10)\n- At 00:10, the driver closely follows the lead kart through the first left-hand bend, maintaining a smooth and consistent line.\n- At 01:07, the driver takes a tighter line through the first corner, hugging the inside wall, which is a deliberate effort to optimize the racing line for corner entry.\n- However, there is a slight deviation from the ideal line at 00:29, where the driver could have taken a more aggressive approach to the third corner.\n\n## BRAKING POINTS  (score: 7/10)\n- At 00:29, the driver begins braking slightly before the third corner, which is a good effort to control speed, but could be improved with more precise application.\n- At 01:40, the driver begins to slow down in preparation for the finish line, with progressive braking, but could benefit from a more aggressive braking point to gain time.\n- The driver tends to brake slightly early, as seen at 01:45, where they begin braking for the next left-handed bend, reducing speed precisely before entry, but could explore later braking points to gain time.\n\n## THROTTLE & EXIT SPEED  (score: 9/10)\n- At 00:17, the driver accelerates quickly onto a short straight, maintaining momentum, which is a strong example of effective throttle application.\n- At 00:41, the driver navigates the final chicane with precise transitions and consistent throttle control, demonstrating excellent car control and exit speed.\n- The driver consistently applies full throttle immediately after exiting turns, as seen at 01:45, which is a key strength in their driving.\n\n## LAP TIME LOSSES\nEstimated time lost per sector:\n- Sector 1: 0.2 seconds (due to early braking at the third corner)\n- Sector 2: 0.1 seconds (due to a slight deviation from the ideal line)\n- Sector 3: 0.3 seconds (due to conservative braking points)\n\n## TOP 3 PRIORITY IMPROVEMENTS\n1. **Corner entry at 00:29**: Explore a more aggressive approach to the third corner, with later braking and a more precise turn-in point to gain time.\n2. **Braking point at 01:40**: Experiment with a later braking point before the finish line to gain time, while maintaining control and stability.\n3. **Corner exit at 01:20**: Focus on applying more aggressive throttle application after exiting the middle set of corners to increase exit speed and gain time.\n\n## OVERALL RATING: 8/10\nBiggest strength: The driver's ability to consistently apply full throttle immediately after exiting turns, demonstrating excellent car control and exit speed.\nBiggest weakness: The driver's tendency to brake slightly early, which can lead to time losses and reduced competitiveness.",
+    "segments": [
+      {
+        "time": "0:00",
+        "racing_line": 8,
+        "braking": 7,
+        "throttle": 9
+      },
+      {
+        "time": "0:30",
+        "racing_line": 8,
+        "braking": 7,
+        "throttle": 9
+      },
+      {
+        "time": "1:00",
+        "racing_line": 9,
+        "braking": 8,
+        "throttle": 9
+      },
+      {
+        "time": "1:30",
+        "racing_line": 9,
+        "braking": 8,
+        "throttle": 9
+      }
+    ],
+    "overall": {
+      "racing_line": 8,
+      "braking": 7,
+      "throttle": 9,
+      "consistency": 8
+    },
+    "driver_style": {
+      "archetype": "Aggressive Driver",
+      "tags": [
+        {
+          "label": "Fast Corner Taker",
+          "emoji": "🔄",
+          "sentiment": "positive"
+        },
+        {
+          "label": "Steady Throttle User",
+          "emoji": "⚖️",
+          "sentiment": "positive"
+        },
+        {
+          "label": "Inconsistent Braker",
+          "emoji": "🛑",
+          "sentiment": "negative"
+        },
+        {
+          "label": "Defensive Racer",
+          "emoji": "🚫",
+          "sentiment": "neutral"
+        }
+      ]
+    }
+  },
+  "coaching:69fd55269edae6db87ff2baf:kart:Full Analysis": {
+    "result": "## PERFORMANCE SUMMARY\nThe driver demonstrated a strong performance, showcasing excellent throttle control and exit speed, with a score of 9/10. However, there is room for improvement in terms of optimizing the racing line and braking points, with scores of 8/10. Overall, the driver's consistency and ability to maintain a clean racing line were notable strengths.\n\n## RACING LINE  (score: 8/10)\n- At 00:23, the driver entered Turn One with a slightly wider line than optimal, potentially costing 0.1 seconds.\n- Between 00:40-00:49, the driver maintained a tight and consistent line through the sequence of corners, but could have improved by 0.05 seconds with more precise steering inputs.\n- At 01:34, the driver exited the final corner of the sequence with a clean line, but could have been more aggressive in terms of turn-in to gain an additional 0.05 seconds.\n\n## BRAKING POINTS  (score: 8/10)\n- At 00:23, the driver began braking early for Turn One, which may have resulted in a 0.1-second loss due to reduced entry speed.\n- At 01:06, the driver braked heavily for Turn Seven, but could have improved by 0.05 seconds with more gradual brake application.\n- At 02:22, the driver began braking again for the next corner, maintaining good balance, but could have optimized brake pressure to gain an additional 0.05 seconds.\n\n## THROTTLE & EXIT SPEED  (score: 9/10)\n- At 00:09, the driver applied throttle aggressively, achieving excellent acceleration down the straight.\n- Between 00:49-01:06, the driver maintained high speed through the sequence of corners, with precise throttle modulation and minimal wheelspin.\n- At 02:12, the driver applied throttle smoothly, achieving rapid acceleration onto the straight with no wheel spin.\n\n## LAP TIME LOSSES\nEstimated time lost per sector:\n- Sector 1: 0.2 seconds (Turn One entry and braking)\n- Sector 2: 0.1 seconds (braking for Turn Seven)\n- Sector 3: 0.05 seconds (exit speed from final corner sequence)\n\n## TOP 3 PRIORITY IMPROVEMENTS\n1. Turn One (00:23): Enter with a more aggressive turn-in and later braking to gain 0.2 seconds.\n2. Turn Seven (01:06): Apply more gradual brake pressure to improve entry speed and gain 0.1 seconds.\n3. Final corner sequence (01:34): Be more aggressive with turn-in and steering inputs to gain an additional 0.1 seconds.\n\n## OVERALL RATING: 8.5/10\nBiggest strength: The driver's ability to maintain a clean racing line and apply smooth, consistent throttle input.\nBiggest weakness: The driver's tendency to brake slightly early and not optimize entry speed for certain corners, resulting in minor time losses.",
+    "segments": [
+      {
+        "time": "0:00",
+        "racing_line": 8,
+        "braking": 7,
+        "throttle": 9
+      },
+      {
+        "time": "0:30",
+        "racing_line": 8,
+        "braking": 8,
+        "throttle": 9
+      },
+      {
+        "time": "1:00",
+        "racing_line": 9,
+        "braking": 8,
+        "throttle": 9
+      },
+      {
+        "time": "1:30",
+        "racing_line": 9,
+        "braking": 8,
+        "throttle": 9
+      },
+      {
+        "time": "2:00",
+        "racing_line": 9,
+        "braking": 8,
+        "throttle": 9
+      },
+      {
+        "time": "2:30",
+        "racing_line": 9,
+        "braking": 8,
+        "throttle": 9
+      },
+      {
+        "time": "3:00",
+        "racing_line": 9,
+        "braking": 8,
+        "throttle": 9
+      }
+    ],
+    "overall": {
+      "racing_line": 8,
+      "braking": 8,
+      "throttle": 9,
+      "consistency": 9
+    },
+    "driver_style": {
+      "archetype": "Aggressive Driver",
+      "tags": [
+        {
+          "label": "Fast Corner Entry",
+          "emoji": "🔄",
+          "sentiment": "positive"
+        },
+        {
+          "label": "Consistent Racing Line",
+          "emoji": "📈",
+          "sentiment": "positive"
+        },
+        {
+          "label": "Abrupt Throttle Application",
+          "emoji": "⚠️",
+          "sentiment": "negative"
+        },
+        {
+          "label": "Aggressive Braking Style",
+          "emoji": "🛑",
+          "sentiment": "negative"
+        }
+      ]
+    }
+  },
+  "coaching:69fd55269edae6db87ff2baf:f1_sim:Full Analysis": {
+    "result": "## PERFORMANCE SUMMARY\nThe driver demonstrated a strong overall performance, with a consistent racing line and effective throttle management. There are opportunities for improvement in braking points and cornering technique to further optimize lap time. The driver's ability to maintain momentum through complex corner sequences was notable.\n\n## RACING LINE  (score: 8/10)\n- At 0:23, the driver navigated a sequence of right-hand corners with precise steering inputs, maintaining a consistent speed and minimal understeer.\n- At 1:39, the driver executed a complex set of sharp bends using late apexing and smooth throttle transition, demonstrating adaptability to different corner types.\n- At 2:31, the driver used steering corrections to maintain momentum through the chicane, but could refine their line to minimize corrections.\n\n## BRAKING POINTS  (score: 7/10)\n- At 0:45, the driver decelerated approaching a tight left-handed bend with effective brake modulation, allowing the car to track the inside with minimal speed loss.\n- At 1:47, there is a potential opportunity to refine braking technique — late braking caused a wide entry reducing corner exit speed.\n- At 2:31, refining the braking point through the chicane could optimize entry speed.\n\n## THROTTLE & EXIT SPEED  (score: 8/10)\n- At 1:39, smooth throttle transition through the complex corner sequence demonstrated strong speed/control balance.\n- At 2:12, full throttle application maximized acceleration onto the back straight reaching peak speed.\n\n## LAP TIME LOSSES\nEstimated time lost per sector:\n- Sector 1: 0.2 seconds (minor braking point refinement opportunities)\n- Sector 2: 0.1 seconds (slight understeer in corners)\n- Sector 3: 0.3 seconds (racing line and braking refinement)\n\n## TOP 3 PRIORITY IMPROVEMENTS\n1. Refine braking at 0:45 to optimize entry speed, potentially saving 0.1 seconds.\n2. Adjust racing line at 2:31 to minimize corrections and maintain consistent speed, saving 0.1 seconds.\n3. Consistent throttle through the chicane at 1:39, potentially saving 0.1 seconds.\n\n## OVERALL RATING: 8/10\nBiggest strength: Maintaining momentum and control through complex corner sequences.\nBiggest weakness: Minor inconsistencies in braking points and racing line.",
+    "segments": [
+      {
+        "time": "0:00",
+        "racing_line": 7,
+        "braking": 7,
+        "throttle": 8
+      },
+      {
+        "time": "1:00",
+        "racing_line": 8,
+        "braking": 7,
+        "throttle": 8
+      },
+      {
+        "time": "2:00",
+        "racing_line": 9,
+        "braking": 8,
+        "throttle": 8
+      },
+      {
+        "time": "3:00",
+        "racing_line": 8,
+        "braking": 7,
+        "throttle": 9
+      }
+    ],
+    "overall": {
+      "racing_line": 8,
+      "braking": 7,
+      "throttle": 8,
+      "consistency": 8
+    },
+    "driver_style": {
+      "archetype": "Momentum Driver",
+      "tags": [
+        {
+          "label": "Consistent Racing Line",
+          "emoji": "📈",
+          "sentiment": "positive"
+        },
+        {
+          "label": "Smooth Throttle Control",
+          "emoji": "⚡",
+          "sentiment": "positive"
+        },
+        {
+          "label": "Late Braking Issues",
+          "emoji": "🛑",
+          "sentiment": "negative"
+        },
+        {
+          "label": "Aggressive Cornering",
+          "emoji": "🔄",
+          "sentiment": "neutral"
+        }
+      ]
+    }
+  },
+  "laps:69fd55269edae6db87ff2baf:f1_sim": {
+    "result": "| Lap | Start | Key Issue |\n|-----|-------|-----------| \n| 1 | 1:39 | Failed overtake attempt at final chicane |\n| 2 | 2:31 | Failed overtake attempt at final chicane |\n| 3 | 3:24 | Failed overtake attempt at final chicane |",
+    "laps": [
+      {
+        "lap_num": 1,
+        "start": 20.0,
+        "lap_time": "1:19.0",
+        "key_issue": "Clean lap",
+        "delta": "+27.0s",
+        "is_best": false
+      },
+      {
+        "lap_num": 2,
+        "start": 99.0,
+        "lap_time": "0:52.0",
+        "key_issue": "Failed overtake attempt at final chicane",
+        "delta": "BEST",
+        "is_best": true
+      },
+      {
+        "lap_num": 3,
+        "start": 151.0,
+        "lap_time": "0:53.0",
+        "key_issue": "Failed overtake attempt at final chicane",
+        "delta": "+1.0s",
+        "is_best": false
+      },
+      {
+        "lap_num": 4,
+        "start": 204.0,
+        "lap_time": "0:36.0",
+        "key_issue": "Failed overtake attempt at final chicane",
+        "delta": "-16.0s",
+        "is_best": false
+      }
+    ]
+  },
+  "moments:69fd55269edae6db87ff2baf:f1_sim": {
+    "result": "| Time | Why It's Great |\n|------|----------------|\n| 02:02 | The Ferrari executes a precise, high-speed overtake on two cars simultaneously, showcasing exceptional control and confidence in tight racing conditions. |\n| 02:04 | A close-up of the dashboard reveals real-time performance metrics during a critical overtaking maneuver, highlighting the synergy between driver skill and advanced vehicle telemetry. |\n| 02:07 | The car maintains blistering speed through a straightaway while executing a flawless pass on multiple competitors, demonstrating superior aerodynamics and driver precision. |\n| 00:44 | Successfully overtakes two competitors in a tight turn, showcasing exceptional handling and strategic positioning under pressure. |\n| 01:06 | Executes a flawless overtake on a sharp right-hand bend, taking the lead with confidence and precision, highlighting peak driving skill. |\n| 14:14 | The red Ferrari accelerates powerfully from grid N18, demonstrating exceptional launch control and early track dominance. |\n| 14:21 | The driver maintains precise steering through initial turns, showcasing composure and confidence amid high-speed entry. |\n| 14:30 | A thrilling side-by-side duel emerges between the white and black cars, highlighting intense competition and split-second decision-making. |",
+    "clips": [
+      {
+        "category": "Clean Overtake",
+        "emoji": "⚡",
+        "start": 50.8,
+        "end": 58.0
+      },
+      {
+        "category": "Perfect Corner",
+        "emoji": "🎯",
+        "start": 87.0,
+        "end": 94.2
+      },
+      {
+        "category": "Clean Overtake",
+        "emoji": "⚡",
+        "start": 123.2,
+        "end": 130.5
+      },
+      {
+        "category": "Perfect Corner",
+        "emoji": "🎯",
+        "start": 181.2,
+        "end": 188.5
+      },
+      {
+        "category": "Perfect Corner",
+        "emoji": "🎯",
+        "start": 231.0,
+        "end": 238.0
+      }
+    ]
+  },
+  "errors:69fd55269edae6db87ff2baf:f1_sim": {
+    "result": "## 🏁 Driving Error Analysis\n\n### 🔴 Racing Line\n| Time | Error | Impact |\n|------|-------|--------|\n\n### 🟡 Braking\n| Time | Error | Impact |\n|------|-------|--------|\n\n### 🟠 Throttle & Traction\n| Time | Error | Impact |\n|------|-------|--------|\n\n### 🔵 Car Control\n| Time | Error | Impact |\n|------|-------|--------|\n\n### 🟣 Overtaking\n| Time | Error | Impact |\n|------|-------|--------|",
+    "error_clips": [
+      {
+        "start": 166.8,
+        "end": 174.0
+      },
+      {
+        "start": 166.8,
+        "end": 174.0
+      },
+      {
+        "start": 166.8,
+        "end": 174.0
+      },
+      {
+        "start": 166.8,
+        "end": 174.0
+      }
+    ],
+    "pegasus_text": "## 🏁 Driving Error Analysis\n\n### 🔴 Racing Line\n| Time | Error | Impact |\n|------|-------|--------|\n\n### 🟡 Braking\n| Time | Error | Impact |\n|------|-------|--------|\n\n### 🟠 Throttle & Traction\n| Time | Error | Impact |\n|------|-------|--------|\n\n### 🔵 Car Control\n| Time | Error | Impact |\n|------|-------|--------|\n\n### 🟣 Overtaking\n| Time | Error | Impact |\n|------|-------|--------|"
+  },
+  "moments:69fac429edd7178efd86d8fe:kart": {
+    "result": "| Time | Why It's Great |\n|------|----------------|\n| 00:26 | The driver maintains exceptional control while navigating a tight right-hand turn, staying close behind another kart without losing traction or drifting off the track. |\n| 00:40 | After exiting a challenging corner, the driver accelerates smoothly down the straight, demonstrating precise throttle management and consistent speed. |\n| 01:08 | The driver skillfully handles a momentary off-track excursion by a competitor, maintaining position and composure without losing momentum. |\n| 01:48 | The sequence of two consecutive left-hand corners is executed with flawless precision, using tight lines and minimal correction to maintain optimal racing line. |\n| 01:50 | Exiting the final sharp right-hander with perfect balance and control, the driver positions themselves optimally for the home stretch, showcasing advanced cornering technique. |",
+    "clips": [
+      {
+        "category": "Clean Acceleration",
+        "emoji": "🚀",
+        "start": 0.0,
+        "end": 7.2
+      },
+      {
+        "category": "Clean Acceleration",
+        "emoji": "🚀",
+        "start": 36.2,
+        "end": 43.5
+      },
+      {
+        "category": "Smooth Apex",
+        "emoji": "🎯",
+        "start": 78.5,
+        "end": 85.5
+      },
+      {
+        "category": "Smooth Apex",
+        "emoji": "🎯",
+        "start": 120.5,
+        "end": 127.5
+      },
+      {
+        "category": "Smooth Apex",
+        "emoji": "🎯",
+        "start": 176.5,
+        "end": 183.5
+      }
+    ]
+  },
+  "errors:69fac429edd7178efd86d8fe:kart": {
+    "result": "## 🏁 Driving Error Analysis\n\n### 🔴 Racing Line\n| Time | Error | Impact |\n|------|-------|--------|\n| 02:45 | Late apex in right-hand turn | Reduced exit speed, limited overtaking opportunity |\n\n### 🟡 Braking\n| Time | Error | Impact |\n|------|-------|--------|\n| 02:57 | Late braking into left-hand turn | Increased risk of understeer and off-track excursion |\n\n### 🔵 Car Control\n| Time | Error | Impact |\n|------|-------|--------|\n| 02:58 | Oversteer during left-hand turn entry | Momentary loss of control, requiring corrective steering input |\n\n### 🔴 Racing Line\n| Time | Error | Impact |\n|------|-------|--------|\n| 00:10 | Late apex in turn entry | Reduced exit speed and limited overtaking opportunity |\n\n### 🟡 Braking\n| Time | Error | Impact |\n|------|-------|--------|\n| 00:02 | Premature braking before turn | Lost time and momentum entering corner |\n\n### 🟠 Throttle & Traction\n| Time | Error | Impact |\n|------|-------|--------|\n| 00:04 | Delayed throttle application after brake release | Reduced acceleration out of turn, lost time |\n\n### 🔵 Car Control\n| Time | Error | Impact |\n|------|-------|--------|\n| 00:06 | Inconsistent steering input during overtaking maneuver | Compromised stability and increased risk of losing control |",
+    "error_clips": [
+      {
+        "start": 99.5,
+        "end": 106.5
+      },
+      {
+        "start": 99.5,
+        "end": 106.5
+      },
+      {
+        "start": 113.5,
+        "end": 120.5
+      },
+      {
+        "start": 85.5,
+        "end": 92.5
+      },
+      {
+        "start": 113.5,
+        "end": 120.5
+      }
+    ],
+    "pegasus_text": "### 🔴 Racing Line\n| Time | Error | Impact |\n|------|-------|--------|\n| 02:45 | Late apex in right-hand turn | Reduced exit speed, limited overtaking opportunity |\n\n### 🟡 Braking\n| Time | Error | Impact |\n|------|-------|--------|\n| 02:57 | Late braking into left-hand turn | Increased risk of understeer and off-track excursion |\n\n### 🔵 Car Control\n| Time | Error | Impact |\n|------|-------|--------|\n| 02:58 | Oversteer during left-hand turn entry | Momentary loss of control, requiring corrective steering input |\n\n### 🔴 Racing Line\n| Time | Error | Impact |\n|------|-------|--------|\n| 00:10 | Late apex in turn entry | Reduced exit speed and limited overtaking opportunity |\n\n### 🟡 Braking\n| Time | Error | Impact |\n|------|-------|--------|\n| 00:02 | Premature braking before turn | Lost time and momentum entering corner |\n\n### 🟠 Throttle & Traction\n| Time | Error | Impact |\n|------|-------|--------|\n| 00:04 | Delayed throttle application after brake release | Reduced acceleration out of turn, lost time |\n\n### 🔵 Car Control\n| Time | Error | Impact |\n|------|-------|--------|\n| 00:06 | Inconsistent steering input during overtaking maneuver | Compromised stability and increased risk of losing control |"
+  }
+}

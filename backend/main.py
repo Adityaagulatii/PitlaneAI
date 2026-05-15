@@ -1,5 +1,6 @@
 """
 PitLane AI — FastAPI Backend
+v2 — parallel Pegasus calls for full-video coverage on long F1 25 sessions.
 Wraps the three FiftyOne plugin operators as HTTP endpoints.
 No FiftyOne dependency. Uses the Twelve Labs Python SDK directly.
 """
@@ -9,6 +10,7 @@ import re
 import json
 import time
 import tempfile
+import httpx
 from typing import Optional
 from pathlib import Path
 from urllib.parse import quote
@@ -22,12 +24,17 @@ from pydantic import BaseModel
 from twelvelabs.errors import TooManyRequestsError
 
 def _check_pegasus_support(e: Exception):
-    """Re-raise a clear HTTPException if the index lacks Pegasus support."""
+    """Re-raise a clear HTTPException for known Twelve Labs plan/index errors."""
     msg = str(e)
     if "index_not_supported_for_generate" in msg:
         raise HTTPException(
             status_code=400,
             detail="This Twelve Labs index was created without Pegasus. Recreate the index with both Marengo + Pegasus engines enabled, then re-upload the video.",
+        )
+    if "usage_limit_exceeded" in msg:
+        raise HTTPException(
+            status_code=402,
+            detail="Twelve Labs plan limit reached — too many indexed videos. Delete unused indexes on the Twelve Labs dashboard to free up quota.",
         )
 
 # ---------------------------------------------------------------------------
@@ -71,13 +78,51 @@ _f1_clips_dir   = Path(__file__).parent.parent / "f1 25"
 
 _KART_INDEX_ID = os.environ.get("KART_INDEX_ID", "69cee50121ee25d048439f9e")
 
-def _get_client():
+_DEFAULT_TIMEOUT = httpx.Timeout(connect=30.0, read=120.0, write=30.0, pool=30.0)
+_LONG_TIMEOUT    = httpx.Timeout(connect=30.0, read=600.0, write=30.0, pool=30.0)
+
+def _get_client(long: bool = False):
     from twelvelabs import TwelveLabs
     if not TWELVELABS_API_KEY:
         raise HTTPException(status_code=500, detail="TWELVELABS_API_KEY not set.")
-    return TwelveLabs(api_key=TWELVELABS_API_KEY)
+    return TwelveLabs(api_key=TWELVELABS_API_KEY, timeout=_LONG_TIMEOUT if long else _DEFAULT_TIMEOUT)
 
 
+# ---------------------------------------------------------------------------
+# Demo mode — skip all live API calls, serve cache only
+# ---------------------------------------------------------------------------
+DEMO_MODE = True
+
+# ---------------------------------------------------------------------------
+# Analysis cache (file-backed, keyed by video_id + analysis type + context)
+# ---------------------------------------------------------------------------
+
+_CACHE_FILE = Path(__file__).parent / "analysis_cache.json"
+_cache: dict = {}
+
+def _load_cache():
+    global _cache
+    if _CACHE_FILE.exists():
+        try:
+            _cache = json.loads(_CACHE_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            _cache = {}
+
+def _save_cache():
+    _CACHE_FILE.write_text(json.dumps(_cache, ensure_ascii=False, indent=2), encoding="utf-8")
+
+def _cache_get(key: str):
+    if not _cache:
+        _load_cache()
+    return _cache.get(key)
+
+def _cache_set(key: str, value):
+    if not _cache:
+        _load_cache()
+    _cache[key] = value
+    _save_cache()
+
+_load_cache()
 
 
 # ---------------------------------------------------------------------------
@@ -107,6 +152,7 @@ F1_ERROR_QUERIES = [
     ("Formula 1 car wheel spin exit traction loss",        "Traction Loss"),
     ("F1 car understeering missing apex",                  "Understeer"),
     ("F1 car locking up wheels under braking",             "Lock-up"),
+    ("F1 car failed overtake attempt divebomb or collision", "Failed Overtake"),
 ]
 
 F1_MOMENT_QUERIES = [
@@ -127,27 +173,46 @@ def _parse_lap_secs(t: str) -> Optional[float]:
         return None
 
 
-def _parse_lap_table(md: str) -> list:
+def _parse_lap_table(md: str, total_secs=None) -> list:
     laps = []
     for line in md.splitlines():
-        if not line.startswith('|') or '---' in line or line.strip().startswith('| Lap'):
+        if not line.startswith('|'):
+            continue
+        stripped = line.replace('-', '').replace('|', '').strip()
+        if not stripped:
             continue
         cells = [c.strip() for c in line.split('|') if c.strip()]
-        if len(cells) < 3:
+        if len(cells) < 2:
+            continue
+        if not re.search(r'\d', cells[0]):
             continue
         try:
-            start_parts = cells[1].split(':')
-            start_secs = int(start_parts[0]) * 60 + float(start_parts[1])
+            lap_num = int(re.sub(r'[^\d]', '', cells[0]))
+            start_match = re.search(r'(\d+):(\d+(?:\.\d+)?)', cells[1])
+            if not start_match:
+                continue
+            start_secs = int(start_match.group(1)) * 60 + float(start_match.group(2))
+            if total_secs is not None and start_secs >= total_secs:
+                continue
+            key_issue  = cells[2] if len(cells) > 2 else "—"
             laps.append({
-                "lap_num":   int(cells[0]),
+                "lap_num":   lap_num,
                 "start":     round(start_secs, 1),
-                "lap_time":  cells[2],
-                "key_issue": cells[3] if len(cells) > 3 else "—",
+                "lap_time":  "—",
+                "key_issue": key_issue,
                 "delta":     "—",
                 "is_best":   False,
             })
         except Exception:
             continue
+    # compute lap durations from consecutive start times
+    for i, lap in enumerate(laps):
+        next_start = laps[i + 1]["start"] if i + 1 < len(laps) else total_secs
+        if next_start is not None:
+            dur = next_start - lap["start"]
+            m, s = divmod(dur, 60)
+            lap["lap_time"] = f"{int(m)}:{s:04.1f}"
+    # compute deltas vs best
     times = [_parse_lap_secs(l["lap_time"]) for l in laps]
     best  = min((t for t in times if t is not None), default=None)
     for i, lap in enumerate(laps):
@@ -190,6 +255,7 @@ class CoachingReportRequest(BaseModel):
 class LapsRequest(BaseModel):
     video_id: str
     context: str = "f1_sim"
+    duration_secs: Optional[int] = None
 
 
 # ---------------------------------------------------------------------------
@@ -250,39 +316,85 @@ def list_videos(context: str = ""):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+def _errors_prompt(role: str, start_label: str, end_label: str, is_f1: bool = False) -> str:
+    categories = (
+        "Racing Line, Braking, Throttle & Traction, Car Control, Overtaking"
+        if is_f1 else
+        "Racing Line, Braking, Throttle & Traction, Car Control"
+    )
+    extra_section = (
+        "\n### 🟣 Overtaking\n"
+        "| Time | Error | Impact |\n"
+        "|------|-------|--------|\n"
+        "| MM:SS | error name | one-line impact |\n"
+    ) if is_f1 else ""
+    return (
+        f"You are an {role}. "
+        f"Watch ONLY the segment from {start_label} to {end_label} and find every driving mistake you can identify in that segment. "
+        f"Assign each mistake to exactly ONE category ({categories}). "
+        "Report timestamps as MM:SS. Do NOT invent timestamps outside the segment range.\n\n"
+        "Output ONLY this markdown:\n\n"
+        "### 🔴 Racing Line\n"
+        "| Time | Error | Impact |\n"
+        "|------|-------|--------|\n"
+        "| MM:SS | error name | one-line impact |\n\n"
+        "### 🟡 Braking\n"
+        "| Time | Error | Impact |\n"
+        "|------|-------|--------|\n"
+        "| MM:SS | error name | one-line impact |\n\n"
+        "### 🟠 Throttle & Traction\n"
+        "| Time | Error | Impact |\n"
+        "|------|-------|--------|\n"
+        "| MM:SS | error name | one-line impact |\n\n"
+        "### 🔵 Car Control\n"
+        "| Time | Error | Impact |\n"
+        "|------|-------|--------|\n"
+        "| MM:SS | error name | one-line impact |\n"
+        + extra_section +
+        "\nOnly include categories that have errors."
+    )
+
+
 @app.post("/analyze/errors")
 def analyze_errors(body: ErrorsRequest):
     """Find driving errors using Pegasus."""
+    cache_key = f"errors:{body.video_id}:{body.context}"
+    if cache_key:
+        cached = _cache_get(cache_key)
+        if cached:
+            return {**cached, "cached": True}
+    if DEMO_MODE:
+        return {"result": "", "error_clips": [], "pegasus_text": "", "demo_skip": True}
     try:
-        client = _get_client()
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        client = _get_client(long=True)
         is_f1 = body.context == "f1_sim"
         role  = "Formula 1 race engineer reviewing F1 25 simulator onboard footage" if is_f1 else "expert go-kart race engineer reviewing onboard lap footage"
-        result = client.analyze(
-            video_id=body.video_id,
-            prompt=(
-                f"You are an {role}. "
-                f"Identify every driving error, focusing on: {body.error_types}. "
-                "Group errors into these categories: Racing Line, Braking, Throttle & Traction, Car Control.\n\n"
-                "Output ONLY the following markdown, no extra text:\n\n"
-                "### 🔴 Racing Line\n"
-                "| Time | Error | Impact |\n"
-                "|------|-------|--------|\n"
-                "| MM:SS | error name | one-line impact |\n\n"
-                "### 🟡 Braking\n"
-                "| Time | Error | Impact |\n"
-                "|------|-------|--------|\n"
-                "| MM:SS | error name | one-line impact |\n\n"
-                "### 🟠 Throttle & Traction\n"
-                "| Time | Error | Impact |\n"
-                "|------|-------|--------|\n"
-                "| MM:SS | error name | one-line impact |\n\n"
-                "### 🔵 Car Control\n"
-                "| Time | Error | Impact |\n"
-                "|------|-------|--------|\n"
-                "| MM:SS | error name | one-line impact |\n\n"
-                "Only include categories that have errors. End with: **Total errors found: N**"
-            ),
-        )
+
+        # Always use 2 parallel calls to guarantee full-video coverage
+        segments = [("0:00", "7:00"), ("7:00", "14:00"), ("14:00", "21:00")] if is_f1 else [("0:00", "2:30"), ("2:30", "end")]
+
+        def _call(seg):
+            return client.analyze(
+                video_id=body.video_id,
+                prompt=_errors_prompt(role, seg[0], seg[1], is_f1=is_f1),
+            )
+        parts = []
+        first_error = None
+        with ThreadPoolExecutor(max_workers=len(segments)) as pool:
+            futures = {pool.submit(_call, seg): seg for seg in segments}
+            for fut in as_completed(futures):
+                try:
+                    parts.append(fut.result().data)
+                except Exception as seg_err:
+                    if first_error is None:
+                        first_error = seg_err
+        if not parts:
+            if first_error:
+                _check_pegasus_support(first_error)
+                raise first_error
+            raise HTTPException(status_code=500, detail="All Pegasus segments failed.")
+        combined = "\n\n".join(parts)
         index_id    = _KART_INDEX_ID
         error_clips = []
         queries     = F1_ERROR_QUERIES if is_f1 else ERROR_MOMENT_QUERIES
@@ -304,11 +416,14 @@ def analyze_errors(body: ErrorsRequest):
             except Exception:
                 continue
 
-        return {
-            "result":        f"## 🏁 Driving Error Analysis\n\n{result.data}",
-            "error_clips":   error_clips,       # Marengo visual clips (precise if found)
-            "pegasus_text":  result.data,        # Pegasus text for timestamp fallback
+        payload = {
+            "result":       f"## 🏁 Driving Error Analysis\n\n{combined}",
+            "error_clips":  error_clips,
+            "pegasus_text": combined,
         }
+        if cache_key:
+            _cache_set(cache_key, payload)
+        return {**payload, "cached": False}
     except HTTPException:
         raise
     except TooManyRequestsError:
@@ -321,63 +436,103 @@ def analyze_errors(body: ErrorsRequest):
 @app.post("/analyze/best-moments")
 def analyze_best_moments(body: BestMomentsRequest):
     """Find best driving moments using Marengo (clips) + Pegasus (description)."""
+    cache_key = f"moments:{body.video_id}:{body.context}"
+    if cache_key:
+        cached = _cache_get(cache_key)
+        if cached:
+            return {**cached, "cached": True}
+    if DEMO_MODE:
+        return {"result": "", "clips": [], "demo_skip": True}
     try:
         client   = _get_client()
         index_id = _KART_INDEX_ID
         queries  = F1_MOMENT_QUERIES if body.context == "f1_sim" else BEST_MOMENT_QUERIES
         role     = "Formula 1 race engineer" if body.context == "f1_sim" else "expert go-kart race engineer"
 
-        # Marengo: find precise clip timestamps
+        # Marengo: find precise clip timestamps — take up to 3 per query to spread across full video
         clips = []
-        md_rows = []
+        seen_starts: set = set()
         for query, emoji, label in queries:
             try:
                 results = client.search.query(
                     index_id=index_id,
                     query_text=query,
                     search_options=["visual"],
-                    page_limit=20,
+                    page_limit=50,
                 )
+                found = 0
                 for clip in (results.data if hasattr(results, 'data') else results):
-                    if clip.video_id == body.video_id:
-                        clips.append({
-                            "category": label,
-                            "emoji": emoji,
-                            "start": round(float(clip.start), 1),
-                            "end": round(float(clip.end), 1),
-                        })
-                        md_rows.append(f"| {_fmt_time(clip.start)} | {emoji} {label} |")
+                    if clip.video_id != body.video_id:
+                        continue
+                    s = round(float(clip.start), 1)
+                    # skip if within 30s of an already-added clip
+                    if any(abs(s - seen) < 30 for seen in seen_starts):
+                        continue
+                    seen_starts.add(s)
+                    clips.append({
+                        "category": label,
+                        "emoji": emoji,
+                        "start": s,
+                        "end": round(float(clip.end), 1),
+                    })
+                    found += 1
+                    if found >= 3:
                         break
             except Exception:
                 continue
+        clips.sort(key=lambda c: c["start"])
 
         # Pegasus: describe what makes these moments special
+        # For F1 (long video): 3 separate calls per segment so output cap doesn't truncate early
         try:
-            pegasus_result = client.analyze(
-                video_id=body.video_id,
-                prompt=(
-                    f"You are an {role}. Identify the 3–5 best driving moments in this video. "
-                    "For each one give the timestamp (MM:SS) and one sentence explaining why it is impressive. "
-                    "Output ONLY a markdown table:\n\n"
-                    "| Time | Why It's Great |\n|------|----------------|\n"
-                    "| MM:SS | reason |"
-                ),
-            )
-            pegasus_md = pegasus_result.data
+            if body.context == "f1_sim":
+                from concurrent.futures import ThreadPoolExecutor, as_completed as _as_completed
+                def _moments_call(seg_start, seg_end):
+                    return client.analyze(
+                        video_id=body.video_id,
+                        prompt=(
+                            f"You are an {role}. Watch ONLY from {seg_start} to {seg_end}. "
+                            "Identify the 2–3 best driving moments in that segment. "
+                            "For each give the exact timestamp (MM:SS) and one sentence why it is impressive. "
+                            "Output ONLY a markdown table:\n\n"
+                            "| Time | Why It's Great |\n|------|----------------|\n"
+                            "| MM:SS | reason |"
+                        ),
+                    )
+                rows = []
+                with ThreadPoolExecutor(max_workers=3) as pool:
+                    futs = [pool.submit(_moments_call, s, e) for s, e in [("0:00","7:00"),("7:00","14:00"),("14:00","21:00")]]
+                    for fut in _as_completed(futs):
+                        try:
+                            rows.append(fut.result().data)
+                        except Exception:
+                            pass
+                # Merge all rows under a single table header
+                merged_rows = []
+                for chunk in rows:
+                    for line in chunk.splitlines():
+                        if line.startswith("| ") and not line.startswith("| Time") and "---" not in line:
+                            merged_rows.append(line)
+                pegasus_md = "| Time | Why It's Great |\n|------|----------------|\n" + "\n".join(merged_rows)
+            else:
+                pegasus_result = client.analyze(
+                    video_id=body.video_id,
+                    prompt=(
+                        f"You are an {role}. Identify the 3–5 best driving moments in this video. "
+                        "For each give the timestamp (MM:SS) and one sentence explaining why it is impressive. "
+                        "Output ONLY a markdown table:\n\n"
+                        "| Time | Why It's Great |\n|------|----------------|\n"
+                        "| MM:SS | reason |"
+                    ),
+                )
+                pegasus_md = pegasus_result.data
         except Exception:
             pegasus_md = ""
 
-        result_md = "## 🌟 Best Moments\n\n"
-        if pegasus_md:
-            result_md += "### Pegasus Analysis\n" + pegasus_md + "\n\n"
-        result_md += "### Marengo Clips\n| Time | Moment |\n|------|--------|\n"
-        if md_rows:
-            result_md += "\n".join(md_rows)
-            result_md += f"\n\n**Total highlights found: {len(clips)}**"
-        else:
-            result_md += "| — | No highlights found |"
-
-        return {"result": result_md, "clips": clips}
+        payload = {"result": pegasus_md or "", "clips": clips}
+        if cache_key:
+            _cache_set(cache_key, payload)
+        return {**payload, "cached": False}
     except HTTPException:
         raise
     except TooManyRequestsError:
@@ -422,13 +577,19 @@ def analyze_ask(body: AskRequest):
 @app.post("/analyze/coaching-report")
 def analyze_coaching_report(body: CoachingReportRequest):
     """Generate a full coaching report using Pegasus + Groq LLaMA (two-step pipeline)."""
+    cache_key = f"coaching:{body.video_id}:{body.context}:{body.focus or 'Full Analysis'}"
+    cached = _cache_get(cache_key)
+    if cached:
+        return {**cached, "cached": True}
+    if DEMO_MODE:
+        return {"result": "", "segments": [], "overall": {}, "driver_style": {}, "demo_skip": True}
     try:
         from groq import Groq
 
         if not GROQ_API_KEY:
             raise HTTPException(status_code=500, detail="GROQ_API_KEY not set.")
 
-        tl_client   = _get_client()
+        tl_client   = _get_client(long=True)
         groq_client = Groq(api_key=GROQ_API_KEY)
 
         focus_instruction = {
@@ -439,13 +600,23 @@ def analyze_coaching_report(body: CoachingReportRequest):
         }.get(body.focus or "Full Analysis", "Cover racing line, braking, throttle, and car control.")
 
         subject = "Formula 1 simulator session (F1 25 game)" if body.context == "f1_sim" else "go-kart onboard lap"
+        is_long = body.context == "f1_sim"
         # Step 1: Pegasus watches the full video
+        # For long videos (21 min), use milestone timestamps to force full coverage instead of "every 30s"
+        if is_long:
+            coverage = (
+                "Observe the driver at these 8 milestone timestamps spread across the full session: "
+                "0:00, 3:00, 6:00, 9:00, 12:00, 15:00, 18:00, 21:00. "
+                "For each timestamp give 2–3 factual sentences on what the driver is doing."
+            )
+        else:
+            coverage = "Describe in detail everything you observe every 30 seconds with timestamps (MM:SS)."
         pegasus_result = tl_client.analyze(
             video_id=body.video_id,
             prompt=(
                 f"Watch this entire {subject} carefully. "
                 f"{focus_instruction} "
-                "Describe in detail everything you observe every 30 seconds with timestamps (MM:SS). "
+                f"{coverage} "
                 "Be raw, factual, and detailed — this will be reviewed by a race engineer."
             ),
         )
@@ -462,7 +633,7 @@ def analyze_coaching_report(body: CoachingReportRequest):
                 {
                     "role": "user",
                     "content": (
-                        f"From these go-kart lap observations, extract performance scores.\n\n"
+                        f"From these {subject} observations, extract performance scores.\n\n"
                         f"{raw_observations}\n\n"
                         "Return JSON in exactly this format:\n"
                         '{"segments":[{"time":"0:00","racing_line":7,"braking":6,"throttle":8}],'
@@ -565,17 +736,37 @@ def analyze_coaching_report(body: CoachingReportRequest):
         except Exception:
             pass
 
-        return {
+        payload = {
             "result": report,
             "segments": segments,
             "overall": overall,
             "driver_style": driver_style,
         }
+        _cache_set(cache_key, payload)
+        return {**payload, "cached": False}
     except HTTPException:
         raise
     except Exception as e:
         _check_pegasus_support(e)
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.delete("/cache/{video_id}")
+def clear_video_cache(video_id: str):
+    """Remove all cached analysis results for a specific video."""
+    _load_cache()
+    keys_removed = [k for k in list(_cache.keys()) if video_id in k]
+    for k in keys_removed:
+        del _cache[k]
+    if keys_removed:
+        _save_cache()
+    return {"removed": keys_removed}
+
+@app.get("/cache/status")
+def cache_status():
+    """Return all cached analysis keys."""
+    _load_cache()
+    return {"cached_keys": list(_cache.keys())}
 
 
 @app.post("/upload")
@@ -656,27 +847,56 @@ def clear_history():
 @app.post("/analyze/laps")
 def analyze_laps(body: LapsRequest):
     """Detect laps and summarise each one using Pegasus (single call)."""
+    cache_key = f"laps:{body.video_id}:{body.context}"
+    cached = _cache_get(cache_key)
+    if cached:
+        return {**cached, "cached": True}
+    if DEMO_MODE:
+        return {"result": "", "laps": [], "demo_skip": True}
     try:
-        client       = _get_client()
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        client       = _get_client(long=True)
         context_desc = (
             "Formula 1 simulator onboard footage (F1 25 game)"
             if body.context == "f1_sim"
             else "go-kart onboard footage"
         )
-        result = client.analyze(
-            video_id=body.video_id,
-            prompt=(
-                f"This is {context_desc}. Analyse every lap in the video. "
-                "For each lap identify: when it starts (MM:SS), the lap duration in M:SS format, "
-                "and the single most significant driving error in one short sentence (or 'Clean lap' if none). "
-                "Output ONLY this markdown table, no extra text:\n\n"
-                "| Lap | Start | Time | Key Issue |\n"
-                "|-----|-------|------|-----------|\n"
-                "| 1 | MM:SS | M:SS | issue |\n"
-            ),
+
+        dur_secs = body.duration_secs
+        dur_label = f"{dur_secs // 60}:{dur_secs % 60:02d}" if dur_secs else None
+        dur_note  = (
+            f" The video is exactly {dur_label} long — do NOT report any timestamp beyond {dur_label}."
+            if dur_label else ""
         )
-        laps = _parse_lap_table(result.data)
-        return {"result": result.data, "laps": laps}
+
+        def _lap_call(seg_start: str, seg_end: str) -> str:
+            r = client.analyze(
+                video_id=body.video_id,
+                prompt=(
+                    f"You are analysing {context_desc}."
+                    + dur_note
+                    + " Watch the entire video and find each real LAP — a lap starts when the car crosses "
+                    "the start/finish line or when the in-game lap counter increments. "
+                    "Each lap in a 4-minute race is roughly 50-90 seconds; do NOT report sections shorter "
+                    "than 30 seconds as separate laps. "
+                    "For each lap report only (a) the timestamp it STARTS and (b) the single most significant "
+                    "driving error in that lap (or 'Clean lap' if none). "
+                    "Only use timestamps you directly observe — do NOT fabricate or extrapolate."
+                    + dur_note
+                    + "\n\nOutput ONLY this exact markdown table, no other text:\n\n"
+                    "| Lap | Start | Key Issue |\n"
+                    "|-----|-------|-----------|\n"
+                    "| 1 | 0:00 | issue |\n"
+                ),
+            )
+            return r.data
+
+        combined_md = _lap_call("0:00", "end")
+
+        laps = _parse_lap_table(combined_md, total_secs=dur_secs)
+        payload = {"result": combined_md, "laps": laps}
+        _cache_set(cache_key, payload)
+        return {**payload, "cached": False}
     except HTTPException:
         raise
     except TooManyRequestsError:
