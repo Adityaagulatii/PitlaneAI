@@ -274,10 +274,41 @@ def _is_f1_video(filename: str) -> bool:
 
 
 
+_DEMO_VIDEOS = [
+    {
+        "id": "69fd55269edae6db87ff2baf",
+        "filename": "Video Project 5.mp4",
+        "context": "f1_sim",
+        "video_url": "https://deuqpmn4rs7j5.cloudfront.net/69cee4dfd098ba9f978269d7/assets/69fd54110907b01eec7997f5/hlses/playlist.m3u8",
+        "thumbnail_url": "https://deuqpmn4rs7j5.cloudfront.net/69cee4dfd098ba9f978269d7/assets/69fd54110907b01eec7997f5/thumbnails/5.jpeg",
+    },
+    {
+        "id": "69fac429edd7178efd86d8fe",
+        "filename": "Lando Norris Helmet POV - LN Karts Australia.mp4",
+        "context": "kart",
+        "video_url": "https://deuqpmn4rs7j5.cloudfront.net/69cee4dfd098ba9f978269d7/assets/69fac429edd7178efd86d8fb/hlses/playlist.m3u8",
+        "thumbnail_url": "https://deuqpmn4rs7j5.cloudfront.net/69cee4dfd098ba9f978269d7/assets/69fac429edd7178efd86d8fb/thumbnails/5.jpeg",
+    },
+    {
+        "id": "69fac428edd7178efd86d8f9",
+        "filename": "GoPro Hero7: A Couple of Laps at GoPro Motorplex (Rental Karts).mp4",
+        "context": "kart",
+        "video_url": "https://deuqpmn4rs7j5.cloudfront.net/69cee4dfd098ba9f978269d7/assets/69fac42615eebe40a6c87201/hlses/playlist.m3u8",
+        "thumbnail_url": "https://deuqpmn4rs7j5.cloudfront.net/69cee4dfd098ba9f978269d7/assets/69fac42615eebe40a6c87201/thumbnails/5.jpeg",
+    },
+]
+
 @app.get("/videos")
 def list_videos(context: str = ""):
     """List videos from kart index, filtered by filename convention.
     'f1_sim' → filenames containing 'f1'; 'kart' → all others; '' → all."""
+    if DEMO_MODE:
+        filtered = [
+            {"id": v["id"], "filename": v["filename"], "video_url": v["video_url"], "thumbnail_url": v["thumbnail_url"]}
+            for v in _DEMO_VIDEOS
+            if not context or v["context"] == context
+        ]
+        return {"videos": filtered}
     try:
         client = _get_client()
         videos = []
