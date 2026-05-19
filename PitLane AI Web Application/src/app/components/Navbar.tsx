@@ -31,7 +31,7 @@ export function Navbar() {
               strokeLinecap="round"
             />
           </svg>
-          <span className="text-white font-semibold text-lg">PitLane AI</span>
+          <span className="text-white font-semibold text-lg">ApexAI</span>
         </div>
 
         {/* Desktop Nav Links */}

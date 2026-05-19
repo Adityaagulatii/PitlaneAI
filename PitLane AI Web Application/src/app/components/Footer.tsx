@@ -30,7 +30,7 @@ export function Footer() {
                   strokeLinecap="round"
                 />
               </svg>
-              <span className="text-white font-semibold text-lg">PitLane AI</span>
+              <span className="text-white font-semibold text-lg">ApexAI</span>
             </div>
             <p className="text-sm mb-6 max-w-xs" style={{ color: 'var(--text-secondary)' }}>
               AI-powered race coaching for every driver. Built at the Voxel51 Hackathon 2026.
@@ -94,7 +94,7 @@ export function Footer() {
           style={{ borderColor: 'var(--border-subtle)' }}
         >
           <div className="text-sm" style={{ color: 'var(--text-muted)' }}>
-            © 2026 PitLane AI. All rights reserved.
+            © 2026 ApexAI. All rights reserved.
           </div>
           <div className="flex items-center gap-6 text-sm">
             <span style={{ color: 'var(--text-muted)' }}>Built with</span>

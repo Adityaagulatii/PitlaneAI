@@ -6,7 +6,7 @@ export function PricingSection() {
       name: 'Free Trial',
       price: '$0',
       period: '3 laps',
-      description: 'Try PitLane AI risk-free',
+      description: 'Try ApexAI risk-free',
       features: [
         'All 4 AI operators',
         'Video up to 10 minutes',

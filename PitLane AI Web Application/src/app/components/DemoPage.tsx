@@ -32,7 +32,7 @@ type PanelKey = 'errors' | 'moments' | 'laps' | 'report';
 const DEMOS = [
   {
     id:        '69fac429edd7178efd86d8fe',
-    title:     'Lando Norris Helmet POV',
+    title:     'Karting Onboard',
     subtitle:  'LN Karts Australia — onboard GoPro',
     context:   'kart' as Context,
     features:  ['Driving Errors', 'Best Moments', 'Coaching Report', 'Driver Style'],
@@ -353,23 +353,17 @@ function DemoPicker({ onPick }: { onPick: (demo: typeof DEMOS[0]) => void }) {
       {/* Nav */}
       <nav className="flex items-center justify-between px-8 h-14 border-b shrink-0" style={{ borderColor: border }}>
         <div className="flex items-center gap-3">
-          <span className="font-bold text-base tracking-tight">PitLane AI</span>
+          <span className="font-bold text-base tracking-tight">ApexAI</span>
           <span className="text-xs px-2 py-0.5 rounded font-semibold"
             style={{ backgroundColor: 'rgba(255,59,59,0.1)', color: red, border: '1px solid rgba(255,59,59,0.2)' }}>
             beta
           </span>
         </div>
-        <NavDropdown />
       </nav>
 
       {/* Hero */}
       <div className="flex flex-col items-center justify-center flex-1 px-6 py-12">
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium mb-6"
-            style={{ backgroundColor: 'rgba(0,255,135,0.08)', color: green, border: '1px solid rgba(0,255,135,0.15)' }}>
-            <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
-            Powered by Twelve Labs · AI cached, instant results
-          </div>
           <h1 className="font-extrabold mb-3 leading-tight" style={{ fontSize: 'clamp(32px, 4vw, 52px)', letterSpacing: '-0.03em' }}>
             Pick a demo to analyse
           </h1>
@@ -379,7 +373,7 @@ function DemoPicker({ onPick }: { onPick: (demo: typeof DEMOS[0]) => void }) {
         </div>
 
         {/* Demo cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 w-full max-w-4xl">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full max-w-5xl">
           {DEMOS.map(demo => (
             <button
               key={demo.id}
@@ -388,7 +382,7 @@ function DemoPicker({ onPick }: { onPick: (demo: typeof DEMOS[0]) => void }) {
               style={{ backgroundColor: card, border: `1px solid ${border}`, '--tw-ring-color': demo.context === 'f1_sim' ? red : green } as React.CSSProperties}>
 
               {/* Thumbnail */}
-              <div className="relative overflow-hidden" style={{ height: 180 }}>
+              <div className="relative overflow-hidden" style={{ height: 280 }}>
                 {demo.thumbnail
                   ? <img src={demo.thumbnail} alt={demo.title} className="w-full h-full object-cover transition-transform group-hover:scale-105" style={{ transitionDuration: '400ms' }} />
                   : <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: surface }}><span style={{ color: textMut, fontSize: 32 }}>▶</span></div>
@@ -434,9 +428,6 @@ function DemoPicker({ onPick }: { onPick: (demo: typeof DEMOS[0]) => void }) {
           ))}
         </div>
 
-        <p className="mt-10 text-xs" style={{ color: textMut }}>
-          All analysis is pre-cached — results appear instantly with zero API usage.
-        </p>
       </div>
     </div>
   );
@@ -594,7 +585,7 @@ export function DemoPage({ onBack }: { onBack: () => void }) {
         </button>
 
         <div className="flex items-center gap-2.5">
-          <span className="font-bold text-sm tracking-tight">PitLane AI</span>
+          <span className="font-bold text-sm tracking-tight">ApexAI</span>
           <span className="h-3.5 w-px" style={{ backgroundColor: border }} />
           <span className="text-xs font-semibold px-2 py-0.5 rounded-md"
             style={{ backgroundColor: context === 'f1_sim' ? 'rgba(255,59,59,0.1)' : 'rgba(0,255,135,0.08)', color: context === 'f1_sim' ? red : green, border: `1px solid ${context === 'f1_sim' ? 'rgba(255,59,59,0.18)' : 'rgba(0,255,135,0.15)'}` }}>
@@ -613,7 +604,6 @@ export function DemoPage({ onBack }: { onBack: () => void }) {
             ? <span className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: green }}><CheckCircle size={12} />Ready</span>
             : <span className="flex items-center gap-1.5 text-xs" style={{ color: textSec }}><Loader2 size={12} className="animate-spin" />Analysing…</span>
           }
-          <NavDropdown />
         </div>
       </header>
 

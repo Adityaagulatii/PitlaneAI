@@ -31,7 +31,7 @@ export function HeroSection({ onAnalyzeClick }: { onAnalyzeClick?: () => void })
             className="text-lg md:text-xl max-w-[560px] mx-auto mb-10"
             style={{ color: 'var(--text-secondary)' }}
           >
-            Upload your onboard lap video. PitLane AI finds your mistakes, highlights your best moments, and tells you
+            Upload your onboard lap video. ApexAI finds your mistakes, highlights your best moments, and tells you
             exactly how to go faster — in plain English.
           </p>
 
