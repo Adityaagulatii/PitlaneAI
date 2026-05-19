@@ -391,9 +391,6 @@ function DemoPicker({ onPick }: { onPick: (demo: typeof DEMOS[0]) => void }) {
       {/* Hero */}
       <div className="flex flex-col items-center justify-center flex-1 px-6 py-12">
         <div className="text-center mb-12">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] mb-4" style={{ color: textMut }}>
-            Powered by Twelve Labs
-          </p>
           <h1 className="font-extrabold mb-2 leading-none" style={{ fontSize: 'clamp(48px, 6vw, 80px)', letterSpacing: '-0.04em' }}>
             Apex<span style={{ color: red }}>AI</span>
           </h1>
