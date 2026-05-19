@@ -1,4 +1,5 @@
-import { useState, useRef, KeyboardEvent } from 'react';
+import { useState, useRef, useEffect, KeyboardEvent } from 'react';
+import Hls from 'hls.js';
 import {
   ArrowLeft, Send, ChevronDown,
   AlertTriangle, Zap, BarChart2, Flag, MessageSquare,
@@ -309,6 +310,32 @@ function LapTable({ laps, onSeek }: { laps: Lap[]; onSeek: (t: number) => void }
   );
 }
 
+// ── HlsVideo ──────────────────────────────────────────────────────────────────
+function HlsVideo({ src, onDuration, style, ...props }: React.VideoHTMLAttributes<HTMLVideoElement> & { src: string; onDuration?: (d: number) => void }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const video = ref.current;
+    if (!video || !src) return;
+    if (src.includes('.m3u8') && Hls.isSupported()) {
+      const hls = new Hls({ startLevel: -1, capLevelToPlayerSize: false });
+      hls.loadSource(src);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(() => {}));
+      return () => hls.destroy();
+    } else {
+      video.src = src;
+    }
+  }, [src]);
+  return (
+    <video
+      ref={ref}
+      {...props}
+      onLoadedMetadata={e => onDuration?.((e.target as HTMLVideoElement).duration)}
+      style={{ width: '100%', display: 'block', objectFit: 'contain', maxHeight: '44vh', ...style }}
+    />
+  );
+}
+
 // ── NavDropdown ───────────────────────────────────────────────────────────────
 function NavDropdown() {
   const [open, setOpen] = useState(false);
@@ -364,11 +391,17 @@ function DemoPicker({ onPick }: { onPick: (demo: typeof DEMOS[0]) => void }) {
       {/* Hero */}
       <div className="flex flex-col items-center justify-center flex-1 px-6 py-12">
         <div className="text-center mb-12">
-          <h1 className="font-extrabold mb-3 leading-tight" style={{ fontSize: 'clamp(32px, 4vw, 52px)', letterSpacing: '-0.03em' }}>
-            Pick a demo to analyse
+          <p className="text-xs font-bold uppercase tracking-[0.2em] mb-4" style={{ color: textMut }}>
+            Powered by Twelve Labs
+          </p>
+          <h1 className="font-extrabold mb-2 leading-none" style={{ fontSize: 'clamp(48px, 6vw, 80px)', letterSpacing: '-0.04em' }}>
+            Apex<span style={{ color: red }}>AI</span>
           </h1>
-          <p className="text-sm" style={{ color: textSec, maxWidth: 400, margin: '0 auto' }}>
-            Choose a video below. AI analysis loads instantly — no waiting, no API calls.
+          <p className="font-semibold mb-6" style={{ fontSize: 18, color: textSec, letterSpacing: '-0.01em' }}>
+            AI Race Engineer
+          </p>
+          <p className="text-sm" style={{ color: textMut, maxWidth: 380, margin: '0 auto' }}>
+            Pick a demo below. Analysis loads instantly — no waiting, no API calls.
           </p>
         </div>
 
@@ -616,9 +649,7 @@ export function DemoPage({ onBack }: { onBack: () => void }) {
 
           <div style={{ borderRadius: 12, overflow: 'hidden', boxShadow: '0 12px 40px rgba(0,0,0,0.5)', flexShrink: 0, backgroundColor: '#000' }}>
             {videoUrl ? (
-              <video ref={videoRef} src={videoUrl} controls autoPlay muted
-                onLoadedMetadata={e => setDuration((e.target as HTMLVideoElement).duration)}
-                style={{ width: '100%', display: 'block', objectFit: 'contain', maxHeight: '44vh' }} />
+              <HlsVideo ref={videoRef} src={videoUrl} controls autoPlay muted onDuration={setDuration} />
             ) : (
               <div style={{ height: 240, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <p style={{ fontSize: 12, color: textMut }}>No video</p>
